@@ -3,9 +3,11 @@
 ---
 ### **队伍简介**
 
-队名：OutOfMemory，队长：鱼丸粗面（zhuoyin94@163.com），邮箱：zhuoyin94@163.com。初赛A榜2/1350，初赛Metric的F1值62.37；初赛B榜2/1350，初赛Metric的F1值为64.52；复赛代码上线工业级流水线测评环境，复赛A榜12/1350，分数为30.95，复赛B轮排名7/1350，分数28.63；综合答辩排名5/1350，获得优胜奖与PAKDD 2021 workshop最佳论文奖。（20210204）
+队名：OutOfMemory，队长：鱼丸粗面（zhuoyin94@163.com）。初赛A榜2/1350，初赛Metric的F1值62.37；初赛B榜2/1350，初赛Metric的F1值为64.52；复赛代码上线工业级流水线测评环境，复赛A榜12/1350，分数为30.95，复赛B轮排名7/1350，分数28.63；综合答辩排名5/1350，获得优胜奖与PAKDD 2021 workshop最佳论文奖。（20210204）
 
-**应主办方要求，本方案代码暂不开源。若后续有开源计划，请移步此[Github开源仓库](https://github.com/MichaelYin1994/tianchi-pakdd-aiops-2021)。**
+~~**应主办方要求，本方案代码暂不开源。若后续有开源计划，请移步此[Github开源仓库](https://github.com/MichaelYin1994/tianchi-pakdd-aiops-2021)。**~~
+
+**20210723，经过主办方同意，开源论文部分相关代码。包括论文数据预处理部分，特征工程部分与Two-stage策略部分。详见src文件夹。**
 
 ---
 ### **系统环境与主要依赖packages**
@@ -26,11 +28,14 @@
 - tensorflow-gpu == 2.1.0
 
 ---
-### **文档下载**
+### **文档，答辩录播与阿里云数据开源地址**
 
 文档下载备用链接：
 - 整体方案说明、PAKDD 2021 Workshop汇报PPT与线下答辩PPT百度网盘下载链接：https://pan.baidu.com/s/1DZz0AjM1-DskhOUVi2SvOg
 - 文件提取码：374s
+- PAKDD 2021 AIOps workshop线上会答辩录屏：https://www.bilibili.com/video/BV1gf4y1h7vY/
+- PAKDD 2021 & 第二届阿里云智能运维线下答辩录播： https://tianchi.aliyun.com/course/live/1654?spm=5176.21852598.0.0.209e37e8fiR3Nn
+- 阿里云数据开源计划项目地址：https://github.com/alibaba-edu/dcbrain
 
 ---
 ### **References**
