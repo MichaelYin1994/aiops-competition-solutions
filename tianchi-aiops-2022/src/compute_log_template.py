@@ -34,7 +34,7 @@ def parse_opt():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--keep-top-n-template', type=int, default=300)
-    opt = parser.parse_args(args=[])
+    opt = parser.parse_args()
 
     return opt
 

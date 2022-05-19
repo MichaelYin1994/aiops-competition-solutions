@@ -132,35 +132,9 @@ def parse_opt():
     parser.add_argument('--tfidf-dim', type=int, default=800) # 800
     parser.add_argument('--tfidf-min-range', type=int, default=1)
     parser.add_argument('--tfidf-max-range', type=int, default=2)
-    opt = parser.parse_args(args=[])
+    opt = parser.parse_args()
 
     return opt
-
-
-# class CONFIGS():
-#     task_name = 'fe_xgb_v2'
-
-#     # keep_last_k_days = 3
-#     # tfidf_max_feats = 600
-#     # tfidf_min_range = 1
-#     # tfidf_max_range = 1
-
-#     keep_last_k_days = 40
-#     tfidf_max_feats = 800
-#     tfidf_min_range = 2
-#     tfidf_max_range = 3
-
-#     msg_embedding_file_name_list = [
-#         'cbow_sg_w2v_joint_80d_16w_dict.pkl',
-#         'cbow_sg_w2v_split_80d_16w_dict.pkl',
-#     ]
-#     timeid_embedding_file_name_list = [
-#         'cbow_sg_timeid_w2v_64d_16w_dict.pkl',
-#     ]
-
-#     cut_func = lambda x: np.digitize(
-#         x, np.arange(0, 5 * 24 * 3600, step=10)
-#     )
 
 
 if __name__ == '__main__':
@@ -261,25 +235,6 @@ if __name__ == '__main__':
         lambda x: {x[0][0]: x[0][1]} if len(x) > 0 else None
     )
 
-    # # 构造连接词
-    # def create_concat_msg(row):
-    #     msg_words = []
-    #     for msg_tmp in row['msg_processed']:
-    #         msg_words.extend(msg_tmp.split(' '))
-
-    #     msg_words = [item for item in msg_words if len(item) != 0]
-    #     msg_words = ''.join(msg_words)
-
-    #     return msg_words
-
-    # total_sel_log_df['msg_processed_connected'] = total_sel_log_df.agg(
-    #     create_concat_msg, axis=1
-    # )
-    # additional_sel_log_df['msg_processed'] = additional_sel_log_df['msg'].apply(process_one_record)
-    # additional_sel_log_df['msg_processed_connected'] = additional_sel_log_df.agg(
-    #     create_concat_msg, axis=1
-    # )
-
     # 时间bin id特征
     total_sel_log_df['time_unix_diff'] = total_sel_log_df.groupby(['sn'])['time_unix'].diff()
     total_sel_log_df['time_unix_diff'] = total_sel_log_df['time_unix_diff'].fillna(0)
@@ -375,20 +330,6 @@ if __name__ == '__main__':
             create_df_corpus_joint_tfidf(tmp_dict, is_process_one_record=True)
         )
 
-    # # 构建训练语料集 + additional语料数据集
-    # msg_connected_raw_corpus_list = []
-    # for key in tqdm(total_sel_log_dict.keys()):
-    #     tmp_df = total_sel_log_dict[key]
-    #     msg_connected_raw_corpus_list.append(
-    #         ' '.join(tmp_df['msg_processed_connected'].values.tolist())
-    #     )
-
-    # for key in tqdm(additional_sel_log_dict.keys()):
-    #     tmp_df = additional_sel_log_dict[key]
-    #     msg_connected_raw_corpus_list.append(
-    #         ' '.join(tmp_df['msg_processed_connected'].values.tolist())
-    #     )
-
     # 构建template id语料数据集
     template_raw_corpus_list = []
     for key in tqdm(total_sel_log_dict.keys()):
@@ -431,250 +372,6 @@ if __name__ == '__main__':
     # )
 
     total_feat_df.drop(['fault_time_unix'], axis=1, inplace=True)
-
-    # TimeDiff embedding特征
-    # ----------
-    # logger.info('TimeDiff word2vec feature engineering...')
-
-    # # 获取time id语料
-    # total_corpus_list = []
-    # for item in tqdm(total_sel_log_list):
-    #     total_corpus_list.append(
-    #         item['sel_log']['time_bin_id'].values.tolist()
-    #     )
-
-    # # 获取word2count
-    # word2count = {}
-    # for sentence in total_corpus_list:
-    #     for word in sentence:
-    #         if word not in word2count:
-    #             word2count[word] = 1
-    #         else:
-    #             word2count[word] += 1
-
-    # for i, embedding_file_name in enumerate(TIMEID_EMBEDDING_FILE_NAME_LIST):
-
-    #     # 载入Embedding文件
-    #     file_handler = LoadSave(dir_name='./cached_data/')
-    #     w2v_dict = file_handler.load_data(file_name=embedding_file_name)
-
-    #     w2v_mean_embedding = compute_mean_embedding(
-    #         corpus=total_corpus_list,
-    #         word2vec=w2v_dict,
-    #         embedding_size=w2v_dict['feat_dim']
-    #     )
-    #     w2v_min_embedding = compute_max_embedding(
-    #         corpus=total_corpus_list,
-    #         word2vec=w2v_dict,
-    #         embedding_size=w2v_dict['feat_dim']
-    #     )
-    #     w2v_max_embedding = compute_min_embedding(
-    #         corpus=total_corpus_list,
-    #         word2vec=w2v_dict,
-    #         embedding_size=w2v_dict['feat_dim']
-    #     )
-
-    #     w2v_embedding_mat = np.hstack(
-    #         [
-    #             w2v_mean_embedding,
-    #             w2v_min_embedding,
-    #             w2v_max_embedding
-    #         ]
-    #     )
-
-    #     # 构建词向量
-    #     n_dim = w2v_embedding_mat.shape[1]
-    #     tmp_feat_df = pd.DataFrame(
-    #         w2v_embedding_mat,
-    #         columns=['feat/numeric/w2v_time_id_v{}_{}'.format(i, j) for j in range(n_dim)]
-    #     )
-    #     total_feat_df = pd.concat(
-    #         [total_feat_df, tmp_feat_df], axis=1
-    #     )
-
-    # # meta信息抽取
-    # # ----------
-    # def compute_msg_meta_feats(meta):
-    #     meta_feats_array = []
-    #     msg_meta_list = meta['sel_log']['msg_meta'].values.tolist()
-    #     msg_type_list = [
-    #         list(item.keys())[0] for item in msg_meta_list if item != None
-    #     ]
-    #     msg_addr_list = [
-    #         list(item.values())[0] for item in msg_meta_list if item != None
-    #     ]
-    #     key_words_list = set([
-    #         'memory', 'processor', 'temperature', 'boot initiated',
-    #         'power state', 'system event', 'system firmwares', 'Unknown',
-    #         'watchdog2', 'critical interrupt'
-    #     ])
-
-    #     # # 一般性的addr地址
-    #     # msg2addr = {}
-    #     # for msg_type, msg_addr in zip(msg_type_list, msg_addr_list):
-    #     #     if msg_type not in msg2addr:
-    #     #         msg2addr[msg_type] = [msg_addr]
-    #     #     else:
-    #     #         msg2addr[msg_type].append(msg_addr)
-
-    #     # for word in key_words_list:
-    #     #     if word in msg2addr:
-    #     #         meta_feats_array.extend(
-    #     #             [len(set(msg2addr[word])), len(msg2addr[word])]
-    #     #         )
-    #     #     else:
-    #     #         meta_feats_array.extend([0, 0])
-
-    #     # cpu相关的addr地址
-    #     msg2addr = {}
-    #     for msg_type, msg_addr in zip(msg_type_list, msg_addr_list):
-    #         if msg_type not in msg2addr:
-    #             msg2addr[msg_type] = [msg_addr]
-    #         else:
-    #             msg2addr[msg_type].append(msg_addr)
-    #     for msg_type in msg2addr.keys():
-    #         msg2addr[msg_type] = [item for item in msg2addr[msg_type] if 'cpu' in item]
-
-    #     for word in key_words_list:
-    #         if word in msg2addr:
-    #             meta_feats_array.extend(
-    #                 [len(set(msg2addr[word])), len(msg2addr[word])]
-    #             )
-    #         else:
-    #             meta_feats_array.extend([0, 0])
-
-    #     return meta_feats_array
-
-    # logger.info('Addr meta feature engineering...')
-
-    # # 计算address特征
-    # total_addr_feats = []
-    # for item in tqdm(total_sel_log_list):
-    #     total_addr_feats.append(
-    #         compute_msg_meta_feats(item)
-    #     )
-    # total_addr_feats = np.vstack(total_addr_feats)
-
-    # # 构建address特征
-    # n_dim = total_addr_feats.shape[1]
-    # tmp_feat_df = pd.DataFrame(
-    #     total_addr_feats,
-    #     columns=['feat/numeric/addr_{}'.format(i) for i in range(n_dim)]
-    # )
-    # total_feat_df = pd.concat([total_feat_df, tmp_feat_df], axis=1)
-
-    # # Msg connected tf-idf统计特征工程
-    # # ----------
-    # logger.info('Msg connected tf-idf feature engineering...')
-
-    # total_corpus_list = []
-    # for item in tqdm(total_sel_log_list):
-    #     total_corpus_list.append(
-    #         ' '.join(item['sel_log']['msg_processed_connected'].values.tolist())
-    #     )
-
-    # _, tfidf_vectorizer = compute_tfidf_feats(
-    #     corpus=msg_connected_raw_corpus_list, max_feats=250, ngram_range=(1, 1)
-    # )
-    # tfidf_array = tfidf_vectorizer.transform(total_corpus_list).toarray()
-
-    # for i in range(tfidf_array.shape[1]):
-    #     total_feat_df['feat/numeric/tfidf_msg_connected_{}'.format(i)] = tfidf_array[:, i]
-
-    # Server model target encoding特征
-    # ----------
-    # tmp_df = total_sel_log_df.groupby(['sn'])['server_model'].agg(
-    #     lambda x: x.iloc[0]
-    # ).reset_index()
-    # tmp_label_df = total_label_df[
-    #     (total_label_df['label'] != -1) & (total_label_df['label'].notnull())
-    # ][['sn', 'label']].reset_index(drop=True)
-    # tmp_df = pd.merge(tmp_df, tmp_label_df, on=['sn'], how='left')
-    # tmp_df = tmp_df[tmp_df['label'].notnull()].reset_index(drop=True)
-    # tmp_taregt_encoding_df = compute_df_target_encoding(tmp_df, 'server_model', 'label')
-
-    # tmp_df = pd.merge(
-    #     tmp_df, tmp_taregt_encoding_df, on=['server_model'], how='left'
-    # )
-
-    # total_feat_df = pd.merge(
-    #     total_feat_df,
-    #     tmp_df.drop_duplicates(['sn'])[['sn', 'feat/numeric/server_model_score']],
-    #     on=['sn'], how='left'
-    # )
-
-    # # Time2fault embedding特征
-    # # ----------
-    # def compute_time2fault_corpus(meta_dict, cut_func):
-    #     '''依据sel_log计算时间戳的相关特征'''
-    #     log_time_seq = meta_dict['sel_log']['time_unix'].values
-    #     fault_time = meta_dict['fault_details']['fault_time_unix']
-
-    #     tmp_corpus = cut_func((fault_time - log_time_seq)).tolist()
-    #     tmp_corpus = [str(item) for item in tmp_corpus]
-
-    #     return tmp_corpus
-
-    # logger.info('Time2fault word2vec feature engineering...')
-
-    # # 获取语料
-    # total_corpus_list = []
-    # for item in tqdm(total_sel_log_list):
-    #     total_corpus_list.append(
-    #         compute_time2fault_corpus(item, cut_func=time2fault_cut_func)
-    #     )
-
-    # # 获取word2count
-    # word2count = {}
-    # for sentence in total_corpus_list:
-    #     for word in sentence:
-    #         if word not in word2count:
-    #             word2count[word] = 1
-    #         else:
-    #             word2count[word] += 1
-
-    # for i, embedding_file_name in enumerate(TIME2FAULT_EMBEDDING_FILE_NAME_LIST):
-
-    #     # 载入Embedding文件
-    #     file_handler = LoadSave(dir_name='./cached_data/')
-    #     w2v_dict = file_handler.load_data(file_name=embedding_file_name)
-
-    #     # w2v_mean_embedding = compute_mean_embedding(
-    #     #     corpus=total_corpus_list,
-    #     #     word2vec=w2v_dict,
-    #     #     embedding_size=w2v_dict['feat_dim']
-    #     # )
-    #     w2v_min_embedding = compute_max_embedding(
-    #         corpus=total_corpus_list,
-    #         word2vec=w2v_dict,
-    #         embedding_size=w2v_dict['feat_dim']
-    #     )
-    #     w2v_max_embedding = compute_min_embedding(
-    #         corpus=total_corpus_list,
-    #         word2vec=w2v_dict,
-    #         embedding_size=w2v_dict['feat_dim']
-    #     )
-    #     # w2v_sif_embedding = compute_sif_embedding(
-    #     #     total_corpus_list, w2v_dict, word2count
-    #     # )
-
-    #     w2v_embedding_mat = np.hstack(
-    #         [
-    #             # w2v_mean_embedding,
-    #             w2v_min_embedding,
-    #             w2v_max_embedding
-    #         ]
-    #     )
-
-    #     # 构建词向量
-    #     n_dim = w2v_embedding_mat.shape[1]
-    #     tmp_feat_df = pd.DataFrame(
-    #         w2v_embedding_mat,
-    #         columns=['feat/numeric/w2v_time2fault_v{}_{}'.format(i, j) for j in range(n_dim)]
-    #     )
-    #     total_feat_df = pd.concat(
-    #         [total_feat_df, tmp_feat_df], axis=1
-    #     )
 
     # Template id embedding特征
     # ----------
@@ -754,14 +451,6 @@ if __name__ == '__main__':
 
     for i in range(tfidf_array.shape[1]):
         total_feat_df['feat/numeric/tfidf_template_id_{}'.format(i)] = tfidf_array[:, i]
-
-    # # svd截断的n-gram特征
-    # tfidf_array, _ = compute_tfidf_svd_feats(
-    #     corpus=template_raw_corpus_list, max_feats=150, ngram_range=(1, 4)
-    # )
-
-    # for i in range(tfidf_array.shape[1]):
-    #     total_feat_df['feat/numeric/tfidf_svd_template_id_{}'.format(i)] = tfidf_array[:, i]
 
     # Msg embedding特征
     # ----------
@@ -858,31 +547,6 @@ if __name__ == '__main__':
             else:
                 time_feats_array.append(func(tmp_array))
 
-        # func_list = [
-        #     np.mean, np.median, quantile(0.9), quantile(0.75),
-        #     quantile(0.25), quantile(0.1)
-        # ]
-        # for func in func_list:
-        #     if len(log_time_seq) == 0:
-        #         time_feats_array.append(np.nan)
-        #     else:
-        #         time_feats_array.append(
-        #             fault_time / func(log_time_seq)
-        #         )
-
-        # tmp_array = np.log(log_time_seq - fault_time + 1)
-        # for func in func_list:
-        #     if len(tmp_array) == 0:
-        #         time_feats_array.append(np.nan)
-        #     else:
-        #         time_feats_array.append(func(tmp_array))
-
-        # # histogram特征群
-        # tmp_array = (fault_time - log_time_seq) / 3600
-        # time_feats_array.extend(
-        #     np.histogram(tmp_array, bins=256, range=(0, 72))[0].tolist()
-        # )
-
         return time_feats_array
 
     logger.info('Create sel_log time features...')
@@ -910,31 +574,11 @@ if __name__ == '__main__':
     _, tfidf_vectorizer = compute_tfidf_feats(
         corpus=msg_raw_corpus_list, max_feats=TFIDF_MAX_FEATS, ngram_range=NGRAM_RANGE
     )
-    # _, tfidf_vectorizer = compute_tfidf_feats(
-    #     corpus=total_corpus_list, max_feats=TFIDF_MAX_FEATS, ngram_range=NGRAM_RANGE
-    # )
+
     tfidf_array = tfidf_vectorizer.transform(total_corpus_list).toarray()
 
     for i in range(tfidf_array.shape[1]):
         total_feat_df['feat/numeric/tfidf_msg_{}'.format(i)] = tfidf_array[:, i]
-
-    # # Msg count统计特征工程
-    # # ----------
-    # logger.info('Msg count feature engineering...')
-
-    # total_corpus_list = []
-    # for item in tqdm(total_sel_log_list):
-    #     total_corpus_list.append(
-    #         create_df_corpus_joint_tfidf(item, is_process_one_record=False)
-    #     )
-
-    # _, count_vectorizer = compute_count_feats(
-    #     corpus=raw_corpus_list, max_feats=TFIDF_MAX_FEATS, ngram_range=NGRAM_RANGE
-    # )
-    # count_array = count_vectorizer.transform(total_corpus_list).toarray()
-
-    # for i in range(TFIDF_MAX_FEATS):
-    #     total_feat_df['feat/numeric/count_msg_{}'.format(i)] = count_array[:, i]
 
     # 保存特征工程的结果
     # *******************
@@ -950,9 +594,9 @@ if __name__ == '__main__':
     logger.info(
         'train_feat_df shape: {}'.format(train_feat_df.shape)
     )
-    # logger.info(
-    #     'test_feat_df shape: {}'.format(test_feat_df.shape)
-    # )
+    logger.info(
+        'test_feat_df shape: {}'.format(test_feat_df.shape)
+    )
 
     if 'lgb_feats' not in os.listdir('./cached_data/'):
         os.mkdir('./cached_data/{}'.format('lgb_feats'))

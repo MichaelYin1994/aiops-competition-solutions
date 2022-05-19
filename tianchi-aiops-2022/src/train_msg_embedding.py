@@ -165,22 +165,6 @@ if __name__ == '__main__':
     # ----------
     logger.info('Training word embedding model...')
 
-    # # 训练FastText模型
-    # fasttext_model = compute_fasttext_embedding(
-    #     corpus=raw_corpus_list,
-    #     negative=20,
-    #     is_save_model=False,
-    #     opt.min_count=opt.min_count,
-    #     window=opt.window_size,
-    #     vector_size=opt.embedding_dim,
-    #     epochs=4,
-    #     min_n=2,
-    #     max_n=6,
-    #     sg=0,
-    #     workers=mp.cpu_count(),
-    #     model_name="fasttext_{}".format(opt.embedding_dim)
-    # )
-
     # 训练CBOW模型
     cbow_model = compute_cbow_embedding(
         corpus=raw_corpus_list,
